@@ -392,8 +392,13 @@ class Structure(HttkObject):
             other_reps = {}
 
         if (rc_sites is None or rc_cell is None or hall_symbol is None):
-            new = cls.use(uc_rep)
-            new._other_reps = other_reps
+            if hall_symbol is None:
+                new = cls.use(uc_rep)
+                new._other_reps = other_reps
+            else:
+                new = cls.use(uc_rep,hall_symbol=hall_symbol)
+                new._other_reps = other_reps
+
         else:
             new = cls(assignments=assignments, rc_sites=rc_sites, rc_cell=rc_cell, other_reps=other_reps)
 
@@ -404,13 +409,13 @@ class Structure(HttkObject):
         return new
 
     @classmethod
-    def use(cls, other):
+    def use(cls, other, hall_symbol=None):
         if isinstance(other, Structure):
             return other
         if isinstance(other, UnitcellStructure):
             transform = get_primitive_to_conventional_basis_transform(other.uc_basis)
             newuc = other.transform(transform)
-            rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities = spacegrouputils.trivial_symmetry_reduce(newuc.uc_reduced_coordgroups)
+            rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities = spacegrouputils.trivial_symmetry_reduce(newuc.uc_reduced_coordgroups,hall_symbol=hall_symbol)
             return cls.create(assignments=newuc.assignments, rc_cell=newuc.uc_cell,
                               rc_reduced_coordgroups=rc_reduced_coordgroups,
                               wyckoff_symbols=wyckoff_symbols,
@@ -469,8 +474,8 @@ class Structure(HttkObject):
             self._other_reps['rc'] = rc_struct
         return self._other_reps['rc']
 
-    def transform(self, matrix, max_search_cells=20, max_atoms=1000):
-        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms)
+    def transform(self, matrix, max_search_cells=20, max_atoms=5000,pass_sym=False):
+        return transform(self, matrix, max_search_cells=max_search_cells, max_atoms=max_atoms,pass_sym=pass_sym)
 
     @httk_typed_property(str)
     def hall_symbol(self):

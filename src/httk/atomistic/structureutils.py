@@ -946,7 +946,7 @@ def get_primitive_basis_transform(hall_symbol):
 #     # Transform to primitive cell
 #     return lattrans
 
-def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
+def transform(structure, transformation, max_search_cells=20, max_atoms=5000,pass_sym=False):
 
     transformation = FracVector.use(transformation).simplify()
     #if transformation.denom != 1:
@@ -962,7 +962,7 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
     #print("SEEK_COUNTS",seek_counts, volume_ratio, structure.uc_counts, transformation)
     total_seek_counts = sum(seek_counts)
     if total_seek_counts > max_atoms:
-        raise Exception("Structure.transform: more than "+str(max_atoms)+" needed. Change limit with max_atoms parameter.")
+        raise Exception("Structure.transform: more than "+str(max_atoms)+" needed, given "+str(total_seek_counts)+". Change limit with max_atoms parameter.")
 
     #if max_search_cells != None and maxvec[0]*maxvec[1]*maxvec[2] > max_search_cells:
     #    raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
@@ -996,11 +996,22 @@ def transform(structure, transformation, max_search_cells=20, max_atoms=1000):
             break
     else:
         raise Exception("Very obtuse angles in cell, to search over all possible lattice vectors will take a very long time. To force, set max_search_cells = None when calling find_prototypeid()")
+    if pass_sym:
+        hall_symbol=structure.hall_symbol
+        #hall_symbol='P 1'
+        print('using this hall symbol',hall_symbol)
+        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments,hall_symbol=hall_symbol)
+    else:
+        return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 
-    return structure.create(uc_reduced_coordgroups=extendedcoordgroups, uc_basis=new_cell.basis, assignments=structure.assignments)
 
 
 def main():
+    from httk.atomistic import Structure
+    structure = Structure.io.load("Tutorial/Step2/POSCAR")
+    transformation=[[5,0,0],[0,5,0],[0,0,5]]
+
+
     cell = FracVector.create([[1, 1, 0], [1, 0, 1], [0, 1, 1]])
     coordgroups = FracVector.create([[[2, 3, 5], [3, 5, 4]], [[4, 6, 7]]])
     assignments = [2, 5]

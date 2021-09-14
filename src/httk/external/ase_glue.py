@@ -129,17 +129,19 @@ def structure_to_ase_atoms(struct):
         symops = get_symops_strs(hall)
         rot, trans = ase.spacegroup.spacegroup.parse_sitesym(symops)
         spgnbr, setting = spacegroup_get_number_and_setting(hall)
-        spg = ase.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr, symbol=hall,
-                                                                     centrosymmetric=None,
-                                                                     scaled_primitive_cell=None,
-                                                                     reciprocal_cell=None,
-                                                                     subtrans=None,
-                                                                     sitesym=None,
-                                                                     rotations=rot,
-                                                                     translations=trans,
-                                                                     datafile=None)
-
-        atoms = crystal(symbols, scaled_positions, spg,
+        spg = ase.spacegroup.spacegroup.spacegroup_from_data(no=spgnbr,
+                                                             symbol=None,
+                                                             setting=int(setting),
+                                                             centrosymmetric=None,
+                                                             scaled_primitive_cell=None,
+                                                             reciprocal_cell=None,
+                                                             subtrans=None,
+                                                             sitesym=symops,
+                                                             rotations=rot,
+                                                             translations=trans,
+                                                             datafile=None)           # ase not reading hall number correctly, changed to spgnbr and setting,symops
+        print(symbols,scaled_positions.to_floats())
+        atoms = crystal(symbols=symbols, basis=scaled_positions.to_floats(), spacegroup=spg,
                         cellpar=[float(struct.rc_a), float(struct.rc_b), float(struct.rc_c),
                                  float(struct.rc_alpha), float(struct.rc_beta), float(struct.rc_gamma)])
     else:
