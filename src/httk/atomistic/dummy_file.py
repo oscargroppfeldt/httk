@@ -1,15 +1,84 @@
 
+
+
+
+
+#from httk.atomistic import Structure
+#structure = Structure.io.load('/home/abhijith/work/httk/Tutorial/Step2/POSCAR')
+#print(structure.pc)
+
+#from httk.iface.vasp_if import structure_to_poscar
+#%%
 from httk.atomistic import Structure
 structure = Structure.io.load('/home/abhijith/work/httk/Tutorial/Step2/POSCAR')
-#transformation=[[3,0,0],[0,3,0],[0,0,3]]
-st=structure
-print('first print of uc_basis: \n', st.uc_basis)
-print(st.uc.uc_sites.counts)
-print('representations: \n',st._other_reps)
-print(st.pc.uc_basis)
-print(st._other_reps)
-print('second print of uc_basis: \n',st.uc_basis)
-print(st.uc.uc_sites.counts)
+transformation=[[3,0,0],[0,3,0],[0,0,3]]
+st=structure.transform(transformation,pass_sym=True)
+#structure_to_poscar('POSCAR_PC', st,fix_negative_determinant=True, comment='vanilla')
+#%%
+
+'''
+import os, errno
+
+import httk
+import httk.db
+from httk.atomistic import Structure
+
+# Remove example database
+try:
+    os.remove('st___.sqlite')
+except OSError as e:
+    if e.errno != errno.ENOENT:
+        raise
+
+backend = httk.db.backend.Sqlite('st___.sqlite')
+store = httk.db.store.SqlStore(backend)
+
+struct = Structure.io.load('/home/abhijith/work/httk/Tutorial/Step2/POSCAR')
+
+transformation=[[3,0,0],[0,3,0],[0,0,3]]
+st=struct.transform(transformation,pass_sym=True)
+store.save(st)
+
+search = store.searcher()
+search_struct = search.variable(Structure)
+#search.add(search_struct.uc_nbr_atoms < 40)
+
+search.output(search_struct, 'structure ')
+
+for match in search:
+    structure = match[0][0]
+    print("Found:", struct.formula)
+
+from httk.iface.vasp_if import structure_to_poscar
+
+
+
+from httk.atomistic import Structure
+structure = Structure.io.load('/home/abhijith/work/httk/Tutorial/Step2/POSCAR')
+#print(structure.pc)
+print(structure.uc.uc_sites.counts)
+transformation=[[3,0,0],[0,3,0],[0,0,3]]
+st_2=structure.transform(transformation,pass_sym=False)
+#print(st_2.uc.uc_sites.counts)
+#st_2.io.save('st_after_mod_uc.vasp')
+#print(st_2.rc.rc_sites.counts)
+
+structure_to_poscar('st_POSCAR_ab', st_2,fix_negative_determinant=True, comment='abhijith')
+
+
+
+
+from httk.atomistic import Structure
+structure = Structure.io.load('/home/abhijith/work/httk/Tutorial/Step2/POSCAR')
+transformation=[[3,0,0],[0,3,0],[0,0,3]]
+st_2=structure.transform(transformation,pass_sym=False)
+print('first print of uc_basis: \n', st_2.uc_basis)
+print(st_2.uc.uc_sites.counts)
+print('representations: \n',st_2._other_reps)
+print(st_2.pc.uc_basis)
+print(st_2._other_reps)
+print('second print of uc_basis: \n',st_2.uc_basis)
+print(st_2.uc.uc_sites.counts)
 
 
 
@@ -34,7 +103,6 @@ print(get_primitive_basis_transform(structure.rc_sites.hall_symbol))
 print(structure.rc_cell.get_axes_standard_order_transform())
 
 
-'''
 # construct defect cell
 final_assignments_class = Assignments.create(assignments=temp_assignments)
 rc_sites = RepresentativeSites.create(reduced_coordgroups=final_coordgroups, spacegroup='P 1')

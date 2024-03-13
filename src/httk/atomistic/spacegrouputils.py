@@ -610,6 +610,7 @@ def trivial_symmetry_reduce(coordgroups,hall_symbol=None):
     """
     # TODO: Actually implement, instead of this placeholder that just gives up and returns P 1
     if hall_symbol is None:
+        print('doing normal')
         symops = []
         symopvs = []
         for symop in all_symops:
@@ -630,7 +631,17 @@ def trivial_symmetry_reduce(coordgroups,hall_symbol=None):
         multiplicities = [1]*sum([len(x) for x in coordgroups])
 
         return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+
+    elif hall_symbol == 'P 1':
+        print('doing manual p1')
+        rc_reduced_coordgroups = coordgroups
+        hall_symbol = 'P 1'
+        wyckoff_symbols = ['a']*sum([len(x) for x in coordgroups])
+        multiplicities = [1]*sum([len(x) for x in coordgroups])
+        return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
+
     else:
+        print('doing manual spgp')
         symopvs=get_symops(hall_symbol)
         rc_reduced_coordgroups, wyckoff_symbols, multiplicities = reduce_by_symops(coordgroups, symopvs, hall_symbol)
         return rc_reduced_coordgroups, hall_symbol, wyckoff_symbols, multiplicities
